@@ -12,6 +12,7 @@ const zonesurls = [
     "https://cdn.jsdelivr.net/gh/freebuisness/assets/zones.json"
 ];
 let zonesURL = zonesurls[Math.floor(Math.random() * zonesurls.length)];
+let lastRandomId = null;
 const coverURL = "https://cdn.jsdelivr.net/gh/freebuisness/covers@main";
 const htmlURL = "https://cdn.jsdelivr.net/gh/freebuisness/html@main";
 let zones = [];
@@ -53,6 +54,15 @@ async function listZones() {
         const response = await fetch(zonesURL+"?t="+Date.now());
         const json = await response.json();
         zones = json;
+        // 🎲 Random Zone (hardcoded)
+        zones.unshift({
+            id: -999,
+            name: "🎲 Random Zone",
+            author: "System",
+            url: "__RANDOM__",
+            cover: "{COVER_URL}/random.png",
+            featured: true
+        });
         zones[0].featured = true; // always gonna be the discord
         await Promise.all([fetchPopularity("year"), fetchPopularity("month"), fetchPopularity("week"), fetchPopularity("day")]);
         sortZones();
@@ -177,7 +187,13 @@ function sortZones() {
     } else if (sortBy === 'trendingDay') {
         zones.sort((a, b) => ((popularityData['day']?.[b.id]) ?? 0) - ((popularityData['day']?.[a.id]) ?? 0));
     }
-    zones.sort((a, b) => (a.id === -1 ? -1 : b.id === -1 ? 1 : 0));
+    zones.sort((a, b) => {
+    if (a.url === "__RANDOM__") return -1;
+    if (b.url === "__RANDOM__") return 1;
+    if (a.id === -1) return -1;
+    if (b.id === -1) return 1;
+    return 0;
+});
     if (featuredContainer.innerHTML === "") {
         const featured = zones.filter(z => z.featured);
         displayFeaturedZones(featured);
@@ -301,6 +317,18 @@ function filterZones() {
 }
 
 function openZone(file) {
+    // 🎲 Handle random zone
+if (file.url === "__RANDOM__") {
+    const validZones = zones.filter(z => z.url !== "__RANDOM__");
+
+    let randomZone;
+    do {
+        randomZone = validZones[Math.floor(Math.random() * validZones.length)];
+    } while (randomZone.id === -999 && validZones.length > 1);
+
+    openZone(randomZone);
+    return;
+}
     if (file.url.startsWith("http")) {
         window.open(file.url, "_blank");
     } else {
