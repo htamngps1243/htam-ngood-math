@@ -10,7 +10,6 @@ const zonesurls = [
     "https://cdn.jsdelivr.net/gh/freebuisness/assets@latest/zones.json",
     "https://cdn.jsdelivr.net/gh/freebuisness/assets@master/zones.json",
     "https://cdn.jsdelivr.net/gh/freebuisness/assets/zones.json"
-    "https://storage.googleapis.com/dogeub/index.html"
 ];
 let zonesURL = zonesurls[Math.floor(Math.random() * zonesurls.length)];
 let lastRandomId = null;
